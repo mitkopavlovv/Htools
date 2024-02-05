@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+﻿using BinaryMapper.Windows.Minidump;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-
 
 namespace HtoolsPdump
 {
@@ -39,10 +39,10 @@ namespace HtoolsPdump
         }
         public static void DProcPid(uint pid)
         {
-            Console.WriteLine($"Work on pid {pid}");
+            Console.WriteLine($"Working on pid {pid}");
             IntPtr hFile = NativeMethods.CreateFile($"HtoolsOutput{pid}.dmp", NativeMethods.EFileAccess.GenericWrite, 0, IntPtr.Zero, NativeMethods.ECreationDisposition.CreateAlways, 0, IntPtr.Zero);
 
-            const uint miniDumpNormal = 0x00000000;
+            const uint miniDumpFull = 0x00000002;
             var procs = Process.GetProcesses();
             foreach (Process proc in procs)
             {
@@ -52,7 +52,7 @@ namespace HtoolsPdump
                     {
                         try
                         {
-                            MiniDumpWriteDump(proc.Handle, (uint)proc.Id, hFile, miniDumpNormal, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                            MiniDumpWriteDump(proc.Handle, (uint)proc.Id, hFile, miniDumpFull, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                             Console.WriteLine($"Output HtoolsOutput{pid}.dmp");
                         }
                         finally
@@ -68,20 +68,21 @@ namespace HtoolsPdump
 
         public static void DProcName(string procName)
         {
-            Console.WriteLine($"Work on process {procName}");
+            Console.WriteLine($"Working on process {procName}");
             IntPtr hFile = NativeMethods.CreateFile($"HtoolsOutput{procName}.dmp", NativeMethods.EFileAccess.GenericWrite, 0, IntPtr.Zero, NativeMethods.ECreationDisposition.CreateAlways, 0, IntPtr.Zero);
 
-            const uint miniDumpNormal = 0x00000000;
+            const uint miniDumpFull = 0x00000002;
             var procs = Process.GetProcesses();
             foreach (Process proc in procs)
             {
-                if (proc.ProcessName == "Notepad")
+                if (proc.ProcessName == procName)
                 {
                     if (hFile != IntPtr.Zero)
                     {
                         try
                         {
-                            MiniDumpWriteDump(proc.Handle, (uint)proc.Id, hFile, miniDumpNormal, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                            MiniDumpWriteDump(proc.Handle, (uint)proc.Id, hFile, miniDumpFull, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                            Console.WriteLine($"Output HtoolsOutput{procName}.dmp");
                         }
                         finally
                         {
@@ -92,6 +93,31 @@ namespace HtoolsPdump
                 }
 
             }
+        }
+
+        public static void ReadProc(string dmpFilePath)
+        {
+            var fileStream = File.OpenRead(dmpFilePath);
+            var reader = new StreamReader(fileStream);
+            var dumpMapper = new MinidumpMapper();
+            var minidumpItSelf = dumpMapper.ReadMinidump(fileStream);
+            Console.WriteLine($"Modules");
+            foreach (var mods in minidumpItSelf.Modules)
+            {
+                Console.WriteLine(mods.Key);
+            }
+            Console.WriteLine($"\n\nMemory stream");
+            using (StreamWriter writer = new StreamWriter($"{dmpFilePath}_parsed.txt"))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    writer.Write(line);
+                }
+                
+            }
+            
+            Console.WriteLine("Ready!");
         }
     }
 }
