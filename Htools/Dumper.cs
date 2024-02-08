@@ -95,29 +95,17 @@ namespace HtoolsPdump
             }
         }
 
-        public static void ReadProc(string dmpFilePath)
+        public static void SendDumpFile(string dmpFilePath)
         {
             var fileStream = File.OpenRead(dmpFilePath);
-            var reader = new StreamReader(fileStream);
             var dumpMapper = new MinidumpMapper();
             var minidumpItSelf = dumpMapper.ReadMinidump(fileStream);
+
             Console.WriteLine($"Modules");
             foreach (var mods in minidumpItSelf.Modules)
             {
                 Console.WriteLine(mods.Key);
             }
-            Console.WriteLine($"\n\nMemory stream");
-            using (StreamWriter writer = new StreamWriter($"{dmpFilePath}_parsed.txt"))
-            {
-                while (!reader.EndOfStream)
-                {
-                    string line = reader.ReadLine();
-                    writer.Write(line);
-                }
-                
-            }
-            
-            Console.WriteLine("Ready!");
         }
     }
 }

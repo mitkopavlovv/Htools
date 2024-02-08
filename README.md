@@ -1,5 +1,5 @@
 ## Process dumping CLI tool written in C#
 # Commands:
-list_procs 
-dump_proc_by_name 
-dump_proc_by_pid 
+list_procs </br>
+dump_proc_by_name </br>
+dump_proc_by_pid </br>

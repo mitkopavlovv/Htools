@@ -29,14 +29,14 @@ class Program
                 case ("parse_dmp"):
                     Console.Write("Dmp File Path: ");
                     string pathValue = Console.ReadLine();
-                    Dumper.ReadProc(pathValue);
+                    Dumper.SendDumpFile(pathValue);
                     break;
                 case ("help"):
                     Console.WriteLine("Help: \n" +
                         "1. list_procs - List processes.\n" +
                         "2. dump_proc_by_name - Dump process by name.\n" +
                         "3. dump_proc_by_pid - Dump process by pid.\n" +
-                        "4. parse_dmp - Load memory dump");
+                        "4. send_dmp - send memory dump to http endpoint");
                     break;
                 case ("exit"):
                     Process currentProcess = Process.GetCurrentProcess();
